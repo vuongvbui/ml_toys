@@ -8,9 +8,6 @@ def entropy(probabilities):
     return sum([- p * log(p) for p in probabilities])
 
 def id3(instances, attrs, goal_attr):
-    count = defaultdict(lambda: defaultdict(int))
-    total = defaultdict(int)
-
     classes = [instance[goal_attr] for instance in instances]
         
     if (not attrs) or (classes.count(classes[0]) == len(classes)):
@@ -18,6 +15,9 @@ def id3(instances, attrs, goal_attr):
 
     entropies = {}
     for attr in attrs:
+        count = defaultdict(lambda: defaultdict(int))
+        total = defaultdict(int)
+        
         for instance in instances:
             count[instance[attr]][instance[goal_attr]] += 1
             total[instance[attr]] += 1
@@ -36,6 +36,16 @@ def id3(instances, attrs, goal_attr):
         subtrees[value] = id3(partition[value], attrs, goal_attr)
     return best_attr, subtrees
 
+def pretty_print(tree, level=0):
+    margin = "  " * level
+    if (isinstance(tree, tuple)):
+        print margin + "[" + tree[0] + "]"
+        for value, subtree in tree[1].items():
+            print margin + "+, " + value
+            pretty_print(subtree, level+1)
+    else:
+        print margin + "--->" + tree
+            
 if __name__ == "__main__":
     attributes = "outlook temperature humidity wind play.tennis?".split()
     goal_attribute = "play.tennis?"
@@ -66,4 +76,5 @@ if __name__ == "__main__":
 
     features = set(attributes)
     features.remove(goal_attribute)
-    print id3(training_data, features, goal_attribute)
+    tree = id3(training_data, features, goal_attribute)
+    pretty_print(tree)
